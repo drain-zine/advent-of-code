@@ -87,20 +87,32 @@ fn parse_instruction(line: &str) -> Result<(i32, i32), String> {
 }
 
 fn zero_crossings(prev: i32, step: i32) -> i32 {
-    let mut pos = prev;
-    let dir = step.signum();
-    let steps = step.abs();
-
-    let mut count = 0;
-
-    for _ in 0..steps {
-        pos = (pos + dir).rem_euclid(100);
-        if pos == 0 {
-            count += 1;
-        }
+    if step == 0 {
+        return 0;
     }
 
-    count
+    let step_dir = step.signum();
+
+    let start = prev + step_dir; // first position visited
+    let end = prev + step; // final position visited
+
+    let (lo, hi) = if start <= end {
+        (start, end)
+    } else {
+        (end, start)
+    };
+
+    let first = div_ceil(lo, 100);
+    let last = hi.div_euclid(100);
+
+    let hits = last - first + 1;
+
+    if hits < 0 { 0 } else { hits }
+}
+
+fn div_ceil(n: i32, d: i32) -> i32 {
+    let (q, r) = (n.div_euclid(d), n.rem_euclid(d));
+    if r == 0 { q } else { q + 1 }
 }
 
 #[cfg(test)]
