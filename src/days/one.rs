@@ -1,6 +1,9 @@
+use std::cmp::max;
+
 use advent_of_code_2025::Solvable;
 
 const START_NUMBER: i32 = 50;
+const DIAL_SIZE: i32 = 100;
 
 pub struct DayOne {
     input: String,
@@ -34,7 +37,7 @@ fn part1(input: &str) -> i32 {
         .lines()
         .fold((START_NUMBER, 0), |(prev, count), line| {
             let (dir, dist) = parse_instruction(line).unwrap();
-            let next = (prev + dir * dist).rem_euclid(100);
+            let next = (prev + dir * dist).rem_euclid(DIAL_SIZE);
 
             let count = count + if next == 0 { 1 } else { 0 };
             (next, count)
@@ -50,7 +53,7 @@ fn part2(input: &str) -> i32 {
             let step = dir * dist;
 
             let hits = zero_crossings(prev, step);
-            let next = (prev + step).rem_euclid(100);
+            let next = (prev + step).rem_euclid(DIAL_SIZE);
 
             (next, count + hits)
         })
@@ -93,26 +96,32 @@ fn zero_crossings(prev: i32, step: i32) -> i32 {
 
     let step_dir = step.signum();
 
-    let start = prev + step_dir; // first position visited
-    let end = prev + step; // final position visited
+    let first_position_visited = prev + step_dir;
+    let last_position_visited = prev + step;
 
-    let (lo, hi) = if start <= end {
-        (start, end)
+    let (lo, hi) = if first_position_visited <= last_position_visited {
+        (first_position_visited, last_position_visited)
     } else {
-        (end, start)
+        (last_position_visited, first_position_visited)
     };
 
-    let first = div_ceil(lo, 100);
-    let last = hi.div_euclid(100);
+    let first_crossing_point = div_ceil(lo, DIAL_SIZE);
+    let last_crossing_point = hi.div_euclid(DIAL_SIZE);
 
-    let hits = last - first + 1;
+    let crossings = last_crossing_point - first_crossing_point + 1;
 
-    if hits < 0 { 0 } else { hits }
+    max(crossings, 0)
 }
 
 fn div_ceil(n: i32, d: i32) -> i32 {
-    let (q, r) = (n.div_euclid(d), n.rem_euclid(d));
-    if r == 0 { q } else { q + 1 }
+    let quotient = n.div_euclid(d);
+    let remainder = n.rem_euclid(d);
+
+    if remainder == 0 {
+        quotient
+    } else {
+        quotient + 1
+    }
 }
 
 #[cfg(test)]
