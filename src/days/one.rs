@@ -1,10 +1,16 @@
+const START_NUMBER: i32 = 50;
+
 pub fn part1() -> i32 {
     let input = include_str!("../data/one.txt");
     solve_part1(input)
 }
 
+pub fn part2() -> i32 {
+    let input = include_str!("../data/one.txt");
+    solve_part2(input)
+}
+
 pub fn solve_part1(input: &str) -> i32 {
-    let start_number = 50;
     let (sequence, password) = input
         .lines()
         .fold((Vec::new(), 0), |(mut acc, mut count), line| {
@@ -12,7 +18,7 @@ pub fn solve_part1(input: &str) -> i32 {
             let step = dir * dist;
 
             let previous_number = if acc.is_empty() {
-                start_number
+                START_NUMBER
             } else {
                 *acc.last().unwrap()
             };
@@ -23,6 +29,44 @@ pub fn solve_part1(input: &str) -> i32 {
                 count += 1;
             }
 
+            acc.push(next);
+
+            (acc, count)
+        });
+
+    println!(
+        "String: {}",
+        sequence
+            .iter()
+            .map(|n| n.to_string())
+            .collect::<Vec<_>>()
+            .join(",")
+    );
+
+    println!("Password: {}", password);
+
+    password
+}
+
+pub fn solve_part2(input: &str) -> i32 {
+    let (sequence, password) = input
+        .lines()
+        .fold((Vec::new(), 0), |(mut acc, mut count), line| {
+            let (dir, dist) = parse_instruction(line).unwrap();
+            let step = dir * dist;
+
+            let previous_number = if acc.is_empty() {
+                START_NUMBER
+            } else {
+                *acc.last().unwrap()
+            };
+
+            let step = dir * dist;
+
+            let hits = zero_crossings(previous_number, step);
+            count += hits;
+
+            let next = (previous_number + step).rem_euclid(100);
             acc.push(next);
 
             (acc, count)
@@ -66,6 +110,23 @@ fn parse_instruction(line: &str) -> Result<(i32, i32), String> {
     Ok((dir, dist))
 }
 
+fn zero_crossings(prev: i32, step: i32) -> i32 {
+    let mut count = 0;
+    let mut pos = prev;
+
+    let dir = step.signum();
+    let steps = step.abs();
+
+    for _ in 0..steps {
+        pos = (pos + dir).rem_euclid(100);
+        if pos == 0 {
+            count += 1;
+        }
+    }
+
+    count
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -98,5 +159,23 @@ mod tests {
 
         let result = solve_part1(input);
         assert_eq!(result, 0);
+    }
+
+    #[test]
+    fn test_part2_sample_input() {
+        let input = "L68\nL30\nR48\nL5\nR60\nL55\nL1\nL99\nR14\nL82";
+
+        let result = solve_part2(input);
+
+        assert_eq!(result, 6);
+    }
+
+    #[test]
+    fn test_part2_large_number() {
+        let input = "R1000";
+
+        let result = solve_part2(input);
+
+        assert_eq!(result, 10);
     }
 }
