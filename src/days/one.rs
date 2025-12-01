@@ -1,89 +1,60 @@
+use advent_of_code_2025::Solvable;
+
 const START_NUMBER: i32 = 50;
 
-pub fn part1() -> i32 {
-    let input = include_str!("../data/one.txt");
-    solve_part1(input)
+pub struct DayOne {
+    input: String,
 }
 
-pub fn part2() -> i32 {
-    let input = include_str!("../data/one.txt");
-    solve_part2(input)
+impl DayOne {
+    pub fn new() -> Self {
+        Self {
+            input: include_str!("../data/one.txt").to_string(),
+        }
+    }
 }
 
-pub fn solve_part1(input: &str) -> i32 {
-    let (sequence, password) = input
+impl Solvable for DayOne {
+    fn solve(&self) {
+        println!("[Day One] Part 1: {}", part1(&self.input));
+        println!("[Day One] Part 2: {}", part2(&self.input));
+    }
+
+    fn solve_part1(&self) {
+        println!("[Day One] Part 1: {}", part1(&self.input));
+    }
+
+    fn solve_part2(&self) {
+        println!("[Day One] Part 2: {}", part2(&self.input));
+    }
+}
+
+fn part1(input: &str) -> i32 {
+    input
         .lines()
-        .fold((Vec::new(), 0), |(mut acc, mut count), line| {
+        .fold((START_NUMBER, 0), |(prev, count), line| {
+            let (dir, dist) = parse_instruction(line).unwrap();
+            let next = (prev + dir * dist).rem_euclid(100);
+
+            let count = count + if next == 0 { 1 } else { 0 };
+            (next, count)
+        })
+        .1
+}
+
+fn part2(input: &str) -> i32 {
+    input
+        .lines()
+        .fold((START_NUMBER, 0), |(prev, count), line| {
             let (dir, dist) = parse_instruction(line).unwrap();
             let step = dir * dist;
 
-            let previous_number = if acc.is_empty() {
-                START_NUMBER
-            } else {
-                *acc.last().unwrap()
-            };
+            let hits = zero_crossings(prev, step);
+            let next = (prev + step).rem_euclid(100);
 
-            let next = (previous_number + step).rem_euclid(100);
-
-            if next == 0 {
-                count += 1;
-            }
-
-            acc.push(next);
-
-            (acc, count)
-        });
-
-    println!(
-        "String: {}",
-        sequence
-            .iter()
-            .map(|n| n.to_string())
-            .collect::<Vec<_>>()
-            .join(",")
-    );
-
-    println!("Password: {}", password);
-
-    password
-}
-
-pub fn solve_part2(input: &str) -> i32 {
-    let (sequence, password) = input
-        .lines()
-        .fold((Vec::new(), 0), |(mut acc, mut count), line| {
-            let (dir, dist) = parse_instruction(line).unwrap();
-            let step = dir * dist;
-
-            let previous_number = if acc.is_empty() {
-                START_NUMBER
-            } else {
-                *acc.last().unwrap()
-            };
-
-            let step = dir * dist;
-
-            let hits = zero_crossings(previous_number, step);
-            count += hits;
-
-            let next = (previous_number + step).rem_euclid(100);
-            acc.push(next);
-
-            (acc, count)
-        });
-
-    println!(
-        "String: {}",
-        sequence
-            .iter()
-            .map(|n| n.to_string())
-            .collect::<Vec<_>>()
-            .join(",")
-    );
-
-    println!("Password: {}", password);
-
-    password
+            (next, count + hits)
+        })
+        .1
 }
 
 fn parse_instruction(line: &str) -> Result<(i32, i32), String> {
@@ -93,10 +64,15 @@ fn parse_instruction(line: &str) -> Result<(i32, i32), String> {
 
     let (turn, steps) = line.split_at(1);
 
-    let dir = match turn.chars().next().unwrap() {
-        'L' => -1,
-        'R' => 1,
-        other => return Err(format!("Invalid direction '{other}' in line: {line}")),
+    let dir = match turn.as_bytes()[0] {
+        b'L' => -1,
+        b'R' => 1,
+        other => {
+            return Err(format!(
+                "Invalid direction '{}' in line: {line}",
+                other as char
+            ));
+        }
     };
 
     let dist: i32 = steps
@@ -111,11 +87,11 @@ fn parse_instruction(line: &str) -> Result<(i32, i32), String> {
 }
 
 fn zero_crossings(prev: i32, step: i32) -> i32 {
-    let mut count = 0;
     let mut pos = prev;
-
     let dir = step.signum();
     let steps = step.abs();
+
+    let mut count = 0;
 
     for _ in 0..steps {
         pos = (pos + dir).rem_euclid(100);
@@ -135,47 +111,25 @@ mod tests {
     fn test_part1_sample_input() {
         let input = "L68\nL30\nR48\nL5\nR60\nL55\nL1\nL99\nR14\nL82";
 
-        let result = solve_part1(input);
-
-        assert_eq!(result, 3);
+        assert_eq!(part1(input), 3);
     }
 
     #[test]
     fn test_part1_moderate_large_distances() {
         let input = "L120\nR85\nL300\nR40\nL260";
-
-        // Manual expected behaviour:
-        //
-        // start = 50
-        //
-        // L120 → (50 - 120) % 100 = 30
-        // R85  → (30 + 85) % 100 = 15
-        // L300 → (15 - 300) % 100 = 15
-        // R40  → (15 + 40) % 100 = 55
-        // L260 → (55 - 260) % 100 = 95
-        //
-        // Sequence: [30, 15, 15, 55, 95]
-        // Zero hits: 0
-
-        let result = solve_part1(input);
-        assert_eq!(result, 0);
+        assert_eq!(part1(input), 0);
     }
 
     #[test]
     fn test_part2_sample_input() {
         let input = "L68\nL30\nR48\nL5\nR60\nL55\nL1\nL99\nR14\nL82";
 
-        let result = solve_part2(input);
-
-        assert_eq!(result, 6);
+        assert_eq!(part2(input), 6);
     }
 
     #[test]
     fn test_part2_large_number() {
         let input = "R1000";
-
-        let result = solve_part2(input);
-
-        assert_eq!(result, 10);
+        assert_eq!(part2(input), 10);
     }
 }

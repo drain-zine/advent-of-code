@@ -1,5 +1,8 @@
+use advent_of_code_2025::Solvable;
+
 mod days;
 
 fn main() {
-    println!("{}", days::one::part2());
+    let day_one = days::one::DayOne::new();
+    day_one.solve()
 }
