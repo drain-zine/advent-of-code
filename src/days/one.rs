@@ -153,4 +153,25 @@ mod tests {
         let input = "R1000";
         assert_eq!(part2(input), 10);
     }
+
+    #[test]
+    fn test_zero_crossings() {
+        assert_eq!(zero_crossings(50, 10), 0);
+
+        assert_eq!(zero_crossings(95, 10), 1);
+
+        // 50-310 -> crosses 0 three times (100, 200, 300)
+        assert_eq!(zero_crossings(50, 260), 3);
+
+        // crosses 3 times in negative direction
+        assert_eq!(zero_crossings(50, -260), 3);
+
+        assert_eq!(zero_crossings(50, 100), 1);
+        assert_eq!(zero_crossings(50, -100), 1);
+
+        assert_eq!(zero_crossings(50, 0), 0);
+
+        assert_eq!(zero_crossings(90, 10), 1);
+        assert_eq!(zero_crossings(10, -10), 1);
+    }
 }
