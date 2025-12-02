@@ -12,7 +12,7 @@ pub struct DayOne {
 impl DayOne {
     pub fn new() -> Self {
         Self {
-            input: include_str!("../data/one.txt").to_string(),
+            input: include_str!("../../data/one.txt").to_string(),
         }
     }
 }
