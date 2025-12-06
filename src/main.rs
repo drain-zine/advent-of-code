@@ -8,4 +8,7 @@ fn main() {
 
     let day_two = days::two::DayTwo::new();
     day_two.solve();
+
+    let day_three = days::three::DayThree::new();
+    day_three.solve();
 }
