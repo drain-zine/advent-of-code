@@ -44,10 +44,13 @@ fn part2(input: &str) -> i64 {
     input.split(',').fold(0_i64, |sum, line| {
         let (start, end) = parse_line(line).unwrap();
 
-        let range_sum = (start..=end)
-            .filter(|&id| is_invalid_id_part_two(id))
-            .map(|id| id as i64)
-            .sum::<i64>();
+        let range_sum = (start..=end).fold(0_i64, |acc, id| {
+            if is_invalid_id_part_two(id) {
+                acc + id as i64
+            } else {
+                acc
+            }
+        });
 
         sum + range_sum
     })
