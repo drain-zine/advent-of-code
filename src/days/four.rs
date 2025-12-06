@@ -35,7 +35,7 @@ fn part1(input: &str) -> i32 {
     let grid = parse_grid(input);
 
     grid.data.iter().enumerate().fold(0, |mut acc, (i, space)| {
-        if *space > 0 && count_neighbors(i, &grid) < 4 {
+        if *space > 0 && count_roll_neighbours(i, &grid) < 4 {
             acc += 1;
         }
 
@@ -43,56 +43,86 @@ fn part1(input: &str) -> i32 {
     })
 }
 
+use std::collections::HashSet;
+
+// Flow:
+// 1. Create set of rolls to check. On first pass this is all.
+// 2. For all rolls that pass the check, add their neighbours to next check set
+// 3. Remove all rolls
+// 4. Repeat
 fn part2(input: &str) -> i32 {
     let mut grid = parse_grid(input);
     let mut total_removed = 0;
 
-    loop {
-        let mut removed = 0;
+    let mut to_check: HashSet<usize> = (0..grid.data.len())
+        .filter(|&i| grid.data[i] == 1)
+        .collect();
 
-        for i in 0..grid.data.len() {
-            if grid.data[i] == 1 && count_neighbors(i, &grid) < 4 {
-                grid.data[i] = 0;
-                removed += 1;
+    while !to_check.is_empty() {
+        let mut to_remove = Vec::new();
+        let mut next_candidates = HashSet::new();
+
+        for &i in &to_check {
+            let neighbours = get_roll_neighbours(i, &grid);
+            if grid.data[i] == 1 && neighbours.len() < 4 {
+                to_remove.push(i);
+
+                for ni in neighbours {
+                    if grid.data[ni] == 1 {
+                        next_candidates.insert(ni);
+                    }
+                }
             }
         }
 
-        if removed == 0 {
+        if to_remove.is_empty() {
             break;
         }
 
-        total_removed += removed;
+        for &i in &to_remove {
+            grid.data[i] = 0;
+        }
+
+        total_removed += to_remove.len();
+        to_check = next_candidates;
     }
 
-    total_removed
+    total_removed as i32
 }
 
-fn count_neighbors(i: usize, grid: &Grid) -> i32 {
-    let width = grid.width;
-    let height = grid.height;
+fn get_roll_neighbours(i: usize, grid: &Grid) -> Vec<usize> {
+    let w = grid.width;
+    let h = grid.height;
+    let x = i % w;
+    let y = i / w;
 
-    let x = i % width;
-    let y = i / width;
-
-    let mut count = 0;
+    let mut neighbours = Vec::with_capacity(8);
 
     for dy in -1..=1 {
         for dx in -1..=1 {
             if dx == 0 && dy == 0 {
-                continue; // skip centre
+                continue; // skip the cell itself
             }
 
             let nx = x as isize + dx;
             let ny = y as isize + dy;
 
-            if nx >= 0 && nx < width as isize && ny >= 0 && ny < height as isize {
-                let ni = idx(nx as usize, ny as usize, width);
-                count += grid.data[ni] as i32;
+            if nx >= 0 && nx < w as isize && ny >= 0 && ny < h as isize {
+                let ni = idx(nx as usize, ny as usize, w);
+                if grid.data[ni] == 1 {
+                    neighbours.push(ni);
+                }
             }
         }
     }
 
-    count
+    neighbours
+}
+
+fn count_roll_neighbours(i: usize, grid: &Grid) -> i32 {
+    let neighbours = get_roll_neighbours(i, grid);
+
+    neighbours.len() as i32
 }
 
 fn idx(x: usize, y: usize, width: usize) -> usize {
