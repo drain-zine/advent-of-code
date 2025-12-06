@@ -1,4 +1,5 @@
 use advent_of_code_2025::Day;
+use std::collections::HashSet;
 
 pub struct DayFour {
     input: String,
@@ -42,8 +43,6 @@ fn part1(input: &str) -> i32 {
         acc
     })
 }
-
-use std::collections::HashSet;
 
 // Flow:
 // 1. Create set of rolls to check. On first pass this is all.
