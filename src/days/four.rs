@@ -48,7 +48,7 @@ fn part1(input: &str) -> i32 {
 // 1. Create set of rolls to check. On first pass this is all.
 // 2. For all rolls that pass the check, add their neighbours to next check set
 // 3. Remove all rolls
-// 4. Repeat
+// 4. Repeat for neighbours
 fn part2(input: &str) -> i32 {
     let mut grid = parse_grid(input);
     let mut total_removed = 0;
@@ -100,7 +100,7 @@ fn get_roll_neighbours(i: usize, grid: &Grid) -> Vec<usize> {
     for dy in -1..=1 {
         for dx in -1..=1 {
             if dx == 0 && dy == 0 {
-                continue; // skip the cell itself
+                continue;
             }
 
             let nx = x as isize + dx;
@@ -129,12 +129,7 @@ fn idx(x: usize, y: usize, width: usize) -> usize {
 }
 
 fn parse_grid(input: &str) -> Grid {
-    let lines: Vec<&str> = input
-        .trim()
-        .lines()
-        .map(|l| l.trim())
-        .filter(|l| !l.is_empty())
-        .collect();
+    let lines: Vec<&str> = input.lines().filter(|l| !l.is_empty()).collect();
 
     let height = lines.len();
     let width = lines[0].len();
