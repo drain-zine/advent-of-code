@@ -11,4 +11,7 @@ fn main() {
 
     let day_three = days::three::DayThree::new();
     day_three.solve();
+
+    let day_four = days::four::DayFour::new();
+    day_four.solve();
 }
