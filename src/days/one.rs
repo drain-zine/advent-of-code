@@ -1,6 +1,6 @@
 use std::cmp::max;
 
-use advent_of_code_2025::Solvable;
+use advent_of_code_2025::Day;
 
 const START_NUMBER: i32 = 50;
 const DIAL_SIZE: i32 = 100;
@@ -17,18 +17,15 @@ impl DayOne {
     }
 }
 
-impl Solvable for DayOne {
-    fn solve(&self) {
-        println!("[Day One] Part 1: {}", part1(&self.input));
-        println!("[Day One] Part 2: {}", part2(&self.input));
+impl Day<i32> for DayOne {
+    const NAME: &'static str = "Day One";
+
+    fn part1(&self) -> i32 {
+        part1(&self.input)
     }
 
-    fn solve_part1(&self) {
-        println!("[Day One] Part 1: {}", part1(&self.input));
-    }
-
-    fn solve_part2(&self) {
-        println!("[Day One] Part 2: {}", part2(&self.input));
+    fn part2(&self) -> i32 {
+        part2(&self.input)
     }
 }
 
@@ -128,11 +125,11 @@ fn div_ceil(n: i32, d: i32) -> i32 {
 mod tests {
     use super::*;
 
+    const SAMPLE: &str = "L68\nL30\nR48\nL5\nR60\nL55\nL1\nL99\nR14\nL82";
+
     #[test]
     fn test_part1_sample_input() {
-        let input = "L68\nL30\nR48\nL5\nR60\nL55\nL1\nL99\nR14\nL82";
-
-        assert_eq!(part1(input), 3);
+        assert_eq!(part1(SAMPLE), 3);
     }
 
     #[test]
@@ -143,9 +140,7 @@ mod tests {
 
     #[test]
     fn test_part2_sample_input() {
-        let input = "L68\nL30\nR48\nL5\nR60\nL55\nL1\nL99\nR14\nL82";
-
-        assert_eq!(part2(input), 6);
+        assert_eq!(part2(SAMPLE), 6);
     }
 
     #[test]
@@ -157,20 +152,12 @@ mod tests {
     #[test]
     fn test_zero_crossings() {
         assert_eq!(zero_crossings(50, 10), 0);
-
         assert_eq!(zero_crossings(95, 10), 1);
-
-        // 50-310 -> crosses 0 three times (100, 200, 300)
         assert_eq!(zero_crossings(50, 260), 3);
-
-        // crosses 3 times in negative direction
         assert_eq!(zero_crossings(50, -260), 3);
-
         assert_eq!(zero_crossings(50, 100), 1);
         assert_eq!(zero_crossings(50, -100), 1);
-
         assert_eq!(zero_crossings(50, 0), 0);
-
         assert_eq!(zero_crossings(90, 10), 1);
         assert_eq!(zero_crossings(10, -10), 1);
     }

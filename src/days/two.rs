@@ -1,4 +1,4 @@
-use advent_of_code_2025::Solvable;
+use advent_of_code_2025::Day;
 
 pub struct DayTwo {
     input: String,
@@ -12,18 +12,15 @@ impl DayTwo {
     }
 }
 
-impl Solvable for DayTwo {
-    fn solve(&self) {
-        println!("[Day Two] Part 1: {}", part1(&self.input));
-        println!("[Day Two] Part 2: {}", part2(&self.input));
+impl Day<i64> for DayTwo {
+    const NAME: &'static str = "Day Two";
+
+    fn part1(&self) -> i64 {
+        part1(&self.input)
     }
 
-    fn solve_part1(&self) {
-        println!("[Day Two] Part 1: {}", part1(&self.input));
-    }
-
-    fn solve_part2(&self) {
-        println!("[Day Two] Part 2: {}", part2(&self.input));
+    fn part2(&self) -> i64 {
+        part2(&self.input)
     }
 }
 
@@ -31,15 +28,11 @@ fn part1(input: &str) -> i64 {
     input.split(',').fold(0_i64, |sum, line| {
         let (start, end) = parse_line(line).unwrap();
 
-        let range_sum = (start..=end).fold(0, |acc, id| {
-            if is_invalid_id_part_one(id) {
-                acc + id
-            } else {
-                acc
-            }
-        });
-
-        sum + range_sum
+        (start..=end)
+            .filter(|&id| is_invalid_id_part_one(id))
+            .map(|id| id as i64)
+            .sum::<i64>()
+            + sum
     })
 }
 
@@ -47,15 +40,11 @@ fn part2(input: &str) -> i64 {
     input.split(',').fold(0_i64, |sum, line| {
         let (start, end) = parse_line(line).unwrap();
 
-        let range_sum = (start..=end).fold(0_i64, |acc, id| {
-            if is_invalid_id_part_two(id) {
-                acc + id as i64
-            } else {
-                acc
-            }
-        });
-
-        sum + range_sum
+        (start..=end)
+            .filter(|&id| is_invalid_id_part_two(id))
+            .map(|id| id as i64)
+            .sum::<i64>()
+            + sum
     })
 }
 
@@ -87,6 +76,7 @@ fn is_invalid_id_part_two(id: i64) -> bool {
 
         let pattern = &s[..p];
         let repeats = n / p;
+
         if repeats >= 2 && s == pattern.repeat(repeats) {
             return true;
         }
@@ -125,26 +115,28 @@ fn parse_line(input: &str) -> Result<(i64, i64), String> {
 mod tests {
     use super::*;
 
-    const SAMPLE_INPUT: &str = "11-22,95-115,998-1012,1188511880-1188511890,222220-222224,1698522-1698528,446443-446449,38593856-38593862,565653-565659,824824821-824824827,2121212118-2121212124";
+    const SAMPLE: &str = "11-22,95-115,998-1012,1188511880-1188511890,\
+                          222220-222224,1698522-1698528,446443-446449,\
+                          38593856-38593862,565653-565659,824824821-824824827,\
+                          2121212118-2121212124";
 
     #[test]
     fn test_part1_sample_input() {
-        assert_eq!(part1(SAMPLE_INPUT), 1227775554);
+        assert_eq!(part1(SAMPLE), 1227775554);
     }
 
     #[test]
     fn test_part2_sample_input() {
-        assert_eq!(part2(SAMPLE_INPUT), 4174379265);
+        assert_eq!(part2(SAMPLE), 4174379265);
     }
 
     #[test]
-    fn test_is_invalid_id_part_2_at_least_twice() {
+    fn test_is_invalid_id_part_2() {
         assert!(is_invalid_id_part_two(12341234)); // 1234 x2
         assert!(is_invalid_id_part_two(123123123)); // 123 x3
         assert!(is_invalid_id_part_two(1212121212)); // 12 x5
         assert!(is_invalid_id_part_two(1111111)); // 1 x7
-
-        assert!(!is_invalid_id_part_two(12345)); // no repetition pattern
-        assert!(!is_invalid_id_part_two(101)); // not a repeated block
+        assert!(!is_invalid_id_part_two(12345)); // no repeat
+        assert!(!is_invalid_id_part_two(101)); // not repeated
     }
 }

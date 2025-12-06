@@ -1,4 +1,4 @@
-use advent_of_code_2025::Solvable;
+use advent_of_code_2025::Day;
 
 mod days;
 
