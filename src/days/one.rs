@@ -33,8 +33,8 @@ fn part1(input: &str) -> i32 {
     input
         .lines()
         .fold((START_NUMBER, 0), |(prev, count), line| {
-            let (dir, dist) = parse_instruction(line).unwrap();
-            let next = (prev + dir * dist).rem_euclid(DIAL_SIZE);
+            let step = parse_instruction(line).unwrap();
+            let next = (prev + step).rem_euclid(DIAL_SIZE);
 
             let count = count + if next == 0 { 1 } else { 0 };
             (next, count)
@@ -46,8 +46,7 @@ fn part2(input: &str) -> i32 {
     input
         .lines()
         .fold((START_NUMBER, 0), |(prev, count), line| {
-            let (dir, dist) = parse_instruction(line).unwrap();
-            let step = dir * dist;
+            let step = parse_instruction(line).unwrap();
 
             let hits = zero_crossings(prev, step);
             let next = (prev + step).rem_euclid(DIAL_SIZE);
@@ -57,7 +56,7 @@ fn part2(input: &str) -> i32 {
         .1
 }
 
-fn parse_instruction(line: &str) -> Result<(i32, i32), String> {
+fn parse_instruction(line: &str) -> Result<i32, String> {
     if line.len() < 2 {
         return Err(format!("Line too short: {line}"));
     }
@@ -83,7 +82,7 @@ fn parse_instruction(line: &str) -> Result<(i32, i32), String> {
         return Err(format!("Steps must be > 0 (got {}) in line: {line}", dist));
     }
 
-    Ok((dir, dist))
+    Ok(dir * dist)
 }
 
 fn zero_crossings(prev: i32, step: i32) -> i32 {
